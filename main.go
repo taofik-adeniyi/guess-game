@@ -31,6 +31,7 @@ var leaderboardTable Leaderboard
 var leaderboard []int
 
 func main() {
+	var totalTimesPlayed int
 	welcomeMessage()
 	computerSelection := computerPlays()
 	displayDifficultyLevels()
@@ -59,21 +60,25 @@ func main() {
 	var res string
 
 	for {
-
-		playGame(retries, computerSelection, choice)
-
+		timesPlayed := playGame(retries, computerSelection, choice)
+		totalTimesPlayed += timesPlayed
+		fmt.Printf("You have played %v amount of times\n", totalTimesPlayed)
 		res = playAgain()
 		if res != "Y" && res != "y" {
 			fmt.Println("Quitting ....")
 			break
 		}
+		// if timesPlayed > 3 {
+		// 	//
+		// 	fmt.Printf("You have played %v amount of times", amountOfTimesPlayed)
+		// }
 	}
+
 }
 
 func playAgain() string {
 	var playAgain string
 	fmt.Printf("Want to play again Y/N: ")
-	fmt.Println("")
 	_, err := fmt.Scan(&playAgain)
 	if err != nil {
 		log.Fatal(err)
@@ -82,10 +87,9 @@ func playAgain() string {
 	return playAgain
 }
 
-func playGame(tries int, computerSelection int, difficulty int) {
+func playGame(tries int, computerSelection int, difficulty int) int {
 	// saveRetries(tries, difficulty)
-	// var timesPlayed int
-	// timesPlayed++
+	var timesPlayed int
 	// if timesplayed is more than 3 show hint
 	// if timesPlayed > 3 {
 	// 	hintUser(usersGuess, computerSelection)
@@ -111,6 +115,8 @@ func playGame(tries int, computerSelection int, difficulty int) {
 		}
 		fmt.Println(msg)
 	}
+	timesPlayed++
+	return timesPlayed
 }
 
 func hintUser(userGuess int, computerGuess int) string {
