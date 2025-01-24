@@ -93,7 +93,9 @@ func playGame(tries int, computerSelection int, difficulty int) {
 	// timer()
 
 	for i := 0; i < tries; i++ {
-		usersGuess := collectGuess()
+		usersGuess, duration := collectGuess()
+		fmt.Printf("Your guess took: %v seconds \n", duration)
+		fmt.Println("")
 		isGreater := computerSelection > usersGuess
 		if usersGuess == computerSelection {
 			stopGame()
@@ -110,11 +112,6 @@ func playGame(tries int, computerSelection int, difficulty int) {
 	}
 }
 
-func timer() {
-	start := time.Now()
-	endTime := time.Since(start)
-	fmt.Println("endTime", endTime)
-}
 func hintUser(userGuess int, computerGuess int) string {
 	fmt.Println("let me give you a hint") // the number is either 9 or 2 or 13
 	var lowPoint int
@@ -171,14 +168,17 @@ func showLeaderBoard() {
 	}
 }
 
-func collectGuess() int {
+func collectGuess() (int, time.Duration) {
+	start := time.Now()
+
 	var guess int
 	fmt.Printf("Enter your guess: ")
 	_, err := fmt.Scan(&guess)
+	endTime := time.Since(start)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	return int(guess)
+	return int(guess), endTime
 }
 
 func computerPlays() int {
