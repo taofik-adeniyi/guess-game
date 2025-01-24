@@ -56,17 +56,12 @@ func main() {
 	fmt.Println("")
 	setDifficulty(choice)
 	startGame()
-	// usersGuess := collectGuess()
-
 	var res string
-	var timesPlayed int
+
 	for {
-		timesPlayed++
-		// if timesplayed is more than 3 show hint
-		// if timesPlayed > 3 {
-		// 	hint(usersGuess, computerSelection)
-		// }
+
 		playGame(retries, computerSelection, choice)
+
 		res = playAgain()
 		if res == "N" {
 			fmt.Println("Quitting ....")
@@ -88,8 +83,16 @@ func playAgain() string {
 
 func playGame(tries int, computerSelection int, difficulty int) {
 	// saveRetries(tries, difficulty)
+	// var timesPlayed int
+	// timesPlayed++
+	// if timesplayed is more than 3 show hint
+	// if timesPlayed > 3 {
+	// 	hintUser(usersGuess, computerSelection)
+	// }
+	// fmt.Printf("You have played: %v times\n", timesPlayed)
+	// timer()
+
 	for i := 0; i < tries; i++ {
-		timer()
 		usersGuess := collectGuess()
 		isGreater := computerSelection > usersGuess
 		if usersGuess == computerSelection {
@@ -112,17 +115,35 @@ func timer() {
 	endTime := time.Since(start)
 	fmt.Println("endTime", endTime)
 }
-func hint(userGuess int, computerGuess int) int {
+func hintUser(userGuess int, computerGuess int) string {
 	fmt.Println("let me give you a hint") // the number is either 9 or 2 or 13
-	var hintValue int
+	var lowPoint int
+	var highPoint int
 	if computerGuess > userGuess {
-		hintValue = computerGuess - userGuess
+		var v0 = computerGuess - userGuess
+		v1 := rand.Intn(v0)
+		v2 := rand.Intn(v0)
+		if v2 > v1 {
+			highPoint = v2
+			lowPoint = v1
+		} else {
+			lowPoint = v2
+			highPoint = v1
+		}
 	} else {
-		hintValue = userGuess - computerGuess
+		var v0 = userGuess - computerGuess
+		v1 := rand.Intn(v0)
+		v2 := rand.Intn(v0)
+		if v2 > v1 {
+			highPoint = v2
+			lowPoint = v1
+		} else {
+			lowPoint = v2
+			highPoint = v1
+		}
 	}
 
-	hintGuess := rand.Intn(hintValue)
-	return hintGuess
+	return fmt.Sprintf("The value is between: %v and %v", highPoint, lowPoint)
 }
 func saveRetries(count int, difficulty int) {
 	fmt.Print("count", count, "difficulty", difficulty)
