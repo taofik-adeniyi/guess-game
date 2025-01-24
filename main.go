@@ -62,16 +62,15 @@ func main() {
 	for {
 		timesPlayed := playGame(retries, computerSelection, choice)
 		totalTimesPlayed += timesPlayed
-		fmt.Printf("You have played %v amount of times\n", totalTimesPlayed)
+		if totalTimesPlayed > 3 {
+			fmt.Printf("You have played %v amount of times", totalTimesPlayed)
+		}
 		res = playAgain()
 		if res != "Y" && res != "y" {
 			fmt.Println("Quitting ....")
 			break
 		}
-		// if timesPlayed > 3 {
-		// 	//
-		// 	fmt.Printf("You have played %v amount of times", amountOfTimesPlayed)
-		// }
+
 	}
 
 }
