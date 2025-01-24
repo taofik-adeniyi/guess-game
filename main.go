@@ -31,38 +31,40 @@ var leaderboardTable Leaderboard
 var leaderboard []int
 
 var currentUserGuess int
+var totalTimesPlayed int
+var correctAnswerTimePlayed int
+var choiceDifficulty int
 
 func main() {
-	var totalTimesPlayed int
 	welcomeMessage()
 	computerSelection := computerPlays()
 	displayDifficultyLevels()
-	var choice int
-	fmt.Printf("Enter your choice: ")
-	_, err := fmt.Scan(&choice)
+
+	fmt.Printf("Enter Difficulty: ")
+	_, err := fmt.Scan(&choiceDifficulty)
 	if err != nil {
 		log.Fatal("invalid option selected")
 	}
-	choice = int(choice)
+	choiceDifficulty = int(choiceDifficulty)
 	var retries int
-	if choice == 1 {
+	if choiceDifficulty == 1 {
 		retries = 10
-	} else if choice == 2 {
+	} else if choiceDifficulty == 2 {
 		retries = 5
-	} else if choice == 3 {
+	} else if choiceDifficulty == 3 {
 		retries = 3
 	} else {
 		log.Fatal("invalid selection")
 	}
 
-	fmt.Printf("Great! You have selected the %v difficulty level. \n", mapDifficulties[choice])
+	fmt.Printf("Great! You have selected the %v difficulty level. \n", mapDifficulties[choiceDifficulty])
 	fmt.Println("")
-	setDifficulty(choice)
+	setDifficulty(choiceDifficulty)
 	startGame()
 	var res string
 
 	for {
-		timesPlayed := playGame(retries, computerSelection, choice)
+		timesPlayed := playGame(retries, computerSelection)
 		totalTimesPlayed += timesPlayed
 		hintValue := hintUser(currentUserGuess, computerSelection)
 		fmt.Println(hintValue)
@@ -90,15 +92,8 @@ func playAgain() string {
 	return playAgain
 }
 
-func playGame(tries int, computerSelection int, difficulty int) int {
-	// saveRetries(tries, difficulty)
+func playGame(tries int, computerSelection int) int {
 	var timesPlayed int
-	// if timesplayed is more than 3 show hint
-	// if timesPlayed > 3 {
-	// 	hintUser(usersGuess, computerSelection)
-	// }
-	// fmt.Printf("You have played: %v times\n", timesPlayed)
-	// timer()
 
 	for i := 0; i < tries; i++ {
 		usersGuess, duration := collectGuess()
@@ -107,6 +102,9 @@ func playGame(tries int, computerSelection int, difficulty int) int {
 		fmt.Println("")
 		isGreater := computerSelection > usersGuess
 		if usersGuess == computerSelection {
+			totalTimesPlayed++
+			correctAnswerTimePlayed += totalTimesPlayed
+			saveToLeaderboard(correctAnswerTimePlayed, choiceDifficulty)
 			stopGame()
 			fmt.Printf("Congratulations! You guessed the correct number in %v attempts.\n", i)
 			break
@@ -153,18 +151,19 @@ func hintUser(userGuess int, computerGuess int) string {
 
 	return fmt.Sprintf("The value is between: %v and %v", highPoint, lowPoint)
 }
-func saveRetries(count int, difficulty int) {
-	fmt.Print("count", count, "difficulty", difficulty)
-	leaderboard = append(leaderboard, count)
+func saveToLeaderboard(timesPlayed int, difficulty int) {
+	fmt.Println("saving to leaderboard")
+	leaderboard = append(leaderboard, timesPlayed)
 	if difficulty == 1 {
-		leaderboardTable.Easy = append(leaderboardTable.Easy, count)
+		leaderboardTable.Easy = append(leaderboardTable.Easy, timesPlayed)
 	} else if difficulty == 2 {
-		leaderboardTable.Medium = append(leaderboardTable.Medium, count)
+		leaderboardTable.Medium = append(leaderboardTable.Medium, timesPlayed)
 	} else if difficulty == 3 {
-		leaderboardTable.Hard = append(leaderboardTable.Hard, count)
+		leaderboardTable.Hard = append(leaderboardTable.Hard, timesPlayed)
 	} else {
 		log.Fatal("Invalid difficulty level")
 	}
+	showLeaderBoard()
 }
 
 func showLeaderBoard() {
