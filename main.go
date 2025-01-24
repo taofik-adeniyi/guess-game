@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -36,6 +37,14 @@ var correctAnswerTimePlayed int
 var choiceDifficulty int
 
 func main() {
+
+	args := os.Args
+	if len(args) == 2 {
+		if args[1] == "--leaderboard" {
+			showLeaderBoard()
+		}
+	}
+
 	welcomeMessage()
 	computerSelection := computerPlays()
 	displayDifficultyLevels()
@@ -66,10 +75,12 @@ func main() {
 	for {
 		timesPlayed := playGame(retries, computerSelection)
 		totalTimesPlayed += timesPlayed
-		hintValue := hintUser(currentUserGuess, computerSelection)
-		fmt.Println(hintValue)
+		if correctAnswerTimePlayed < 0 {
+			hintValue := hintUser(currentUserGuess, computerSelection)
+			fmt.Println(hintValue)
+		}
 		if totalTimesPlayed > 3 {
-			fmt.Printf("You have played %v amount of times", totalTimesPlayed)
+			fmt.Printf("You have played %v amount of times\n", totalTimesPlayed)
 		}
 		res = playAgain()
 		if res != "Y" && res != "y" {
@@ -106,7 +117,7 @@ func playGame(tries int, computerSelection int) int {
 			correctAnswerTimePlayed += totalTimesPlayed
 			saveToLeaderboard(correctAnswerTimePlayed, choiceDifficulty)
 			stopGame()
-			fmt.Printf("Congratulations! You guessed the correct number in %v attempts.\n", i)
+			fmt.Printf("Congratulations! You guessed the correct number on your %v attempt.\n", i)
 			break
 		}
 		var msg string
@@ -167,14 +178,21 @@ func saveToLeaderboard(timesPlayed int, difficulty int) {
 }
 
 func showLeaderBoard() {
-	for _, value := range leaderboardTable.Easy {
-		fmt.Printf("Retries: %d", value)
+	if len(leaderboardTable.Easy) > 0 {
+		for key, value := range leaderboardTable.Easy {
+			fmt.Println("Easy")
+			fmt.Printf("%d: %d\n", key+1, value)
+		}
 	}
-	for _, value := range leaderboardTable.Medium {
-		fmt.Printf("Retries: %d", value)
+	if len(leaderboardTable.Medium) > 0 {
+		for _, value := range leaderboardTable.Medium {
+			fmt.Printf("Retries: %d\n", value)
+		}
 	}
-	for _, value := range leaderboardTable.Hard {
-		fmt.Printf("Retries: %d", value)
+	if len(leaderboardTable.Hard) > 0 {
+		for _, value := range leaderboardTable.Hard {
+			fmt.Printf("Retries: %d\n", value)
+		}
 	}
 }
 
