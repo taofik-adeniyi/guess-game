@@ -63,7 +63,7 @@ func main() {
 		playGame(retries, computerSelection, choice)
 
 		res = playAgain()
-		if res == "N" {
+		if res != "Y" && res != "y" {
 			fmt.Println("Quitting ....")
 			break
 		}
@@ -73,6 +73,7 @@ func main() {
 func playAgain() string {
 	var playAgain string
 	fmt.Printf("Want to play again Y/N: ")
+	fmt.Println("")
 	_, err := fmt.Scan(&playAgain)
 	if err != nil {
 		log.Fatal(err)
