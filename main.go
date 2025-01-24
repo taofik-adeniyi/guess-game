@@ -30,6 +30,8 @@ var leaderboardTable Leaderboard
 
 var leaderboard []int
 
+var currentUserGuess int
+
 func main() {
 	var totalTimesPlayed int
 	welcomeMessage()
@@ -62,6 +64,8 @@ func main() {
 	for {
 		timesPlayed := playGame(retries, computerSelection, choice)
 		totalTimesPlayed += timesPlayed
+		hintValue := hintUser(currentUserGuess, computerSelection)
+		fmt.Println(hintValue)
 		if totalTimesPlayed > 3 {
 			fmt.Printf("You have played %v amount of times", totalTimesPlayed)
 		}
@@ -98,6 +102,7 @@ func playGame(tries int, computerSelection int, difficulty int) int {
 
 	for i := 0; i < tries; i++ {
 		usersGuess, duration := collectGuess()
+		currentUserGuess += usersGuess
 		fmt.Printf("Your guess took: %v seconds \n", duration)
 		fmt.Println("")
 		isGreater := computerSelection > usersGuess
