@@ -14,6 +14,22 @@ var mapDifficulties = map[int]string{
 	3: "Hard",
 }
 
+type Leaderboard struct {
+	Easy   []int
+	Medium []int
+	Hard   []int
+}
+
+type Difficulty struct {
+	Easy   string
+	Medium string
+	Hard   string
+}
+
+var leaderboardTable Leaderboard
+
+var leaderboard []int
+
 func main() {
 	welcomeMessage()
 	computerSelection := computerPlays()
@@ -40,8 +56,40 @@ func main() {
 	fmt.Println("")
 	setDifficulty(choice)
 	startGame()
+	// usersGuess := collectGuess()
 
-	for i := 0; i < retries; i++ {
+	var res string
+	var timesPlayed int
+	for {
+		timesPlayed++
+		// if timesplayed is more than 3 show hint
+		// if timesPlayed > 3 {
+		// 	hint(usersGuess, computerSelection)
+		// }
+		playGame(retries, computerSelection, choice)
+		res = playAgain()
+		if res == "N" {
+			fmt.Println("Quitting ....")
+			break
+		}
+	}
+}
+
+func playAgain() string {
+	var playAgain string
+	fmt.Printf("Want to play again Y/N: ")
+	_, err := fmt.Scan(&playAgain)
+	if err != nil {
+		log.Fatal(err)
+	}
+	playAgain = string(playAgain)
+	return playAgain
+}
+
+func playGame(tries int, computerSelection int, difficulty int) {
+	// saveRetries(tries, difficulty)
+	for i := 0; i < tries; i++ {
+		timer()
 		usersGuess := collectGuess()
 		isGreater := computerSelection > usersGuess
 		if usersGuess == computerSelection {
@@ -56,38 +104,28 @@ func main() {
 			msg = fmt.Sprintf("Incorrect! The number is less than %v.\n", usersGuess)
 		}
 		fmt.Println(msg)
-		var playAgain string
-		fmt.Printf("Want to play again Y/N: ")
-		_, err := fmt.Scan(&playAgain)
-		if err != nil {
-			log.Fatal(err)
-		}
-		playAgain = string(playAgain)
-		if playAgain == "Y" {
-			// play game again
-		}
 	}
 }
-
-type Leaderboard struct {
-	Easy   []int
-	Medium []int
-	Hard   []int
-}
-
-var leaderboardTable Leaderboard
-
-var leaderboard []int
 
 func timer() {
 	start := time.Now()
 	endTime := time.Since(start)
 	fmt.Println("endTime", endTime)
 }
-func hint() {
+func hint(userGuess int, computerGuess int) int {
 	fmt.Println("let me give you a hint") // the number is either 9 or 2 or 13
+	var hintValue int
+	if computerGuess > userGuess {
+		hintValue = computerGuess - userGuess
+	} else {
+		hintValue = userGuess - computerGuess
+	}
+
+	hintGuess := rand.Intn(hintValue)
+	return hintGuess
 }
 func saveRetries(count int, difficulty int) {
+	fmt.Print("count", count, "difficulty", difficulty)
 	leaderboard = append(leaderboard, count)
 	if difficulty == 1 {
 		leaderboardTable.Easy = append(leaderboardTable.Easy, count)
@@ -110,12 +148,6 @@ func showLeaderBoard() {
 	for _, value := range leaderboardTable.Hard {
 		fmt.Printf("Retries: %d", value)
 	}
-}
-
-type Difficulty struct {
-	Easy   string
-	Medium string
-	Hard   string
 }
 
 func collectGuess() int {
