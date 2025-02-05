@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"math/rand"
 	"os"
@@ -15,37 +17,64 @@ var mapDifficulties = map[int]string{
 	3: "Hard",
 }
 
+const leaderboardFileName = "leaderboard.json"
+
 type Leaderboard struct {
-	Easy   []int
-	Medium []int
-	Hard   []int
+	// Easy   []RecordType `json:"easy"`
+	// Medium []RecordType `json:"medium"`
+	// Hard   []RecordType `json:"hard"`
+	// RecordType
+	TimesPlayed int
+	Date        time.Time
+	Difficulty  string
+}
+
+type RecordType struct {
+	TimesPlayed int
+	Date        time.Time
+	Difficulty  string
 }
 
 type Difficulty struct {
-	Easy   string
-	Medium string
-	Hard   string
+	Easy   string `json:"easy"`
+	Medium string `json:"medium"`
+	Hard   string `json:"hard"`
 }
 
-var leaderboardTable Leaderboard
+var leaderboardTable []Leaderboard
 
-var leaderboard []int
+// var leaderboard []int
 
 var currentUserGuess int
 var totalTimesPlayed int
 var correctAnswerTimePlayed int
 var choiceDifficulty int
 
+func displayHelpfulTexts() {
+	fmt.Println("guess [flags]")
+	fmt.Println("guess [command]")
+	fmt.Println("")
+
+	fmt.Println("Available Commands:")
+	fmt.Println("leaderboard           Displays the leaderboard")
+	fmt.Println("help 	              Displays this helpful text")
+}
+
 func main() {
 
 	args := os.Args
+	fmt.Println("args", args)
 	if len(args) == 2 {
+		fmt.Println("-----leaderboard-----")
 		if args[1] == "--leaderboard" {
 			showLeaderBoard()
+			os.Exit(1)
 		}
 	}
 
+	createLeaderboardFileIfNotExists()
 	welcomeMessage()
+	displayHelpfulTexts()
 	computerSelection := computerPlays()
 	displayDifficultyLevels()
 
@@ -133,6 +162,12 @@ func playGame(tries int, computerSelection int) int {
 }
 
 func hintUser(userGuess int, computerGuess int) string {
+	//computer 80
+	//user 52
+
+	//user is low
+	//pick a number between
+	// hint should be 80-52/= 28
 	fmt.Println("let me give you a hint") // the number is either 9 or 2 or 13
 	var lowPoint int
 	var highPoint int
@@ -162,37 +197,68 @@ func hintUser(userGuess int, computerGuess int) string {
 
 	return fmt.Sprintf("The value is between: %v and %v", highPoint, lowPoint)
 }
+
+func createLeaderboardFileIfNotExists() {
+	fsys := os.DirFS(".")
+	_, err := fs.Stat(fsys, leaderboardFileName)
+	if err != nil {
+		fmt.Println(leaderboardFileName, " does not exist")
+		fmt.Println("creating", leaderboardFileName)
+		lfile, err := os.Create(leaderboardFileName)
+		if err != nil {
+			log.Fatal("error creating leaderboard file")
+		}
+		lfile.Close()
+	}
+}
 func saveToLeaderboard(timesPlayed int, difficulty int) {
 	fmt.Println("saving to leaderboard")
-	leaderboard = append(leaderboard, timesPlayed)
 	if difficulty == 1 {
-		leaderboardTable.Easy = append(leaderboardTable.Easy, timesPlayed)
+
+		leaderboardTable = append(leaderboardTable, Leaderboard{TimesPlayed: timesPlayed, Date: time.Now(), Difficulty: "easy"})
 	} else if difficulty == 2 {
-		leaderboardTable.Medium = append(leaderboardTable.Medium, timesPlayed)
+		leaderboardTable = append(leaderboardTable, Leaderboard{TimesPlayed: timesPlayed, Date: time.Now(), Difficulty: "medium"})
+
 	} else if difficulty == 3 {
-		leaderboardTable.Hard = append(leaderboardTable.Hard, timesPlayed)
+		leaderboardTable = append(leaderboardTable, Leaderboard{TimesPlayed: timesPlayed, Date: time.Now(), Difficulty: "hard"})
 	} else {
 		log.Fatal("Invalid difficulty level")
+	}
+
+	fsys := os.DirFS(".")
+	fileByte, err := fs.ReadFile(fsys, leaderboardFileName)
+	if err != nil {
+		createLeaderboardFileIfNotExists()
+	}
+	err = json.Unmarshal(fileByte, &leaderboardTable)
+	fmt.Println("leaderboardTable", leaderboardTable)
+	if err != nil {
+		log.Fatal("error bytes to struct", err)
+	}
+
+	byteToSave, err := json.Marshal(leaderboardTable)
+	if err != nil {
+		log.Fatal("unable to convert struct to byte")
+	}
+	err = os.WriteFile(leaderboardFileName, byteToSave, 0644)
+	if err != nil {
+		log.Fatal("unable to save to leaderboard")
 	}
 	showLeaderBoard()
 }
 
 func showLeaderBoard() {
-	if len(leaderboardTable.Easy) > 0 {
-		for key, value := range leaderboardTable.Easy {
-			fmt.Println("Easy")
-			fmt.Printf("%d: %d\n", key+1, value)
-		}
+	fsByte, err := fs.ReadFile(os.DirFS("."), leaderboardFileName)
+	if err != nil {
+		log.Fatal(err)
 	}
-	if len(leaderboardTable.Medium) > 0 {
-		for _, value := range leaderboardTable.Medium {
-			fmt.Printf("Retries: %d\n", value)
-		}
+	err = json.Unmarshal(fsByte, &leaderboardTable)
+	if err != nil {
+		log.Fatal(err)
 	}
-	if len(leaderboardTable.Hard) > 0 {
-		for _, value := range leaderboardTable.Hard {
-			fmt.Printf("Retries: %d\n", value)
-		}
+
+	for key, value := range leaderboardTable {
+		fmt.Printf("%d: %v\n", key+1, value)
 	}
 }
 
