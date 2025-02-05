@@ -32,7 +32,13 @@ go build
 ./guess
 ```
 
-5. Follow the instructions to play the game.
+5. Leaderboard: Displays the top 10 players with their scores and difficulty levels.
+
+```bash
+./guess --leaderboard
+```
+
+6. Follow the instructions to play the game.
 
 ## Features
 
