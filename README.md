@@ -1,22 +1,50 @@
-Display welcome message when game starts
+# HELPFUL LINK
 
-computer randomly selects a number between 1 and 100
+[https://github.com/thewhitetulip/guess-the-number/blob/master/guess.go](https://github.com/thewhitetulip/guess-the-number/blob/master/guess.go)
 
-user selects difficulty (easy, medium,hard)
-easy - 10 chances
-medium - 5 chances
-hard - 3 chances
-print to screen what difficulty they choose
+# Guess the Number
 
-user enters guess
-validate the pick to be an int and not be a uint
+Guess the Number is a simple number guessing game written in Go. It is a fun and engaging way to test your knowledge of the language and to challenge your problem-solving skills.
 
-if guess correct display congratulatory message
-along with the number of attemtps taken
+## How to Play
 
-if incorrect indicate if its greater than or less than
+1. Clone the repository:
 
-if the user runs out of turns
-end game
+```bash
+git clone https://github.com/taofik-adeniyi/guess.git
+```
 
-https://roadmap.sh/projects/number-guessing-game
+2. Change into the directory:
+
+```bash
+cd guess
+```
+
+3. Build the project:
+
+```bash
+go build
+```
+
+4. Run the project:
+
+```bash
+./guess
+```
+
+5. Follow the instructions to play the game.
+
+## Features
+
+- Easy: 10 guesses
+- Medium: 5 guesses
+- Hard: 3 guesses
+- Leaderboard: Displays the top 10 players with their scores and difficulty levels.
+
+## Contributing
+
+Contributions are welcome! If you find any bugs or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
