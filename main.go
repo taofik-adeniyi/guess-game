@@ -12,9 +12,9 @@ import (
 
 var DIFFICULTY = 1
 var mapDifficulties = map[int]string{
-	1: "Easy",
+	1: "Hard",
 	2: "Medium",
-	3: "Hard",
+	3: "Easy",
 }
 
 const leaderboardFileName = "leaderboard.json"
@@ -34,6 +34,10 @@ type RecordType struct {
 	Date        time.Time
 	Difficulty  string
 }
+
+var news []Leaderboard
+
+var defaultLeaderBoard = []Leaderboard{}
 
 type Difficulty struct {
 	Easy   string `json:"easy"`
@@ -204,6 +208,7 @@ func createLeaderboardFileIfNotExists() {
 	if err != nil {
 		fmt.Println(leaderboardFileName, " does not exist")
 		fmt.Println("creating", leaderboardFileName)
+
 		lfile, err := os.Create(leaderboardFileName)
 		if err != nil {
 			log.Fatal("error creating leaderboard file")
@@ -211,40 +216,73 @@ func createLeaderboardFileIfNotExists() {
 		lfile.Close()
 	}
 }
-func saveToLeaderboard(timesPlayed int, difficulty int) {
-	fmt.Println("saving to leaderboard")
-	if difficulty == 1 {
 
-		leaderboardTable = append(leaderboardTable, Leaderboard{TimesPlayed: timesPlayed, Date: time.Now(), Difficulty: "easy"})
-	} else if difficulty == 2 {
-		leaderboardTable = append(leaderboardTable, Leaderboard{TimesPlayed: timesPlayed, Date: time.Now(), Difficulty: "medium"})
-
-	} else if difficulty == 3 {
-		leaderboardTable = append(leaderboardTable, Leaderboard{TimesPlayed: timesPlayed, Date: time.Now(), Difficulty: "hard"})
-	} else {
-		log.Fatal("Invalid difficulty level")
+func writeLeaderboardFile(entries []Leaderboard) error {
+	byteToSave, err := json.Marshal(entries)
+	if err != nil {
+		return fmt.Errorf("error converting to JSON: %w", err)
 	}
 
+	if err := os.WriteFile(leaderboardFileName, byteToSave, 0644); err != nil {
+		return fmt.Errorf("error writing to file: %w", err)
+	}
+
+	return nil
+}
+
+func readLeaderboardFile() ([]Leaderboard, error) {
 	fsys := os.DirFS(".")
 	fileByte, err := fs.ReadFile(fsys, leaderboardFileName)
 	if err != nil {
-		createLeaderboardFileIfNotExists()
-	}
-	err = json.Unmarshal(fileByte, &leaderboardTable)
-	fmt.Println("leaderboardTable", leaderboardTable)
-	if err != nil {
-		log.Fatal("error bytes to struct", err)
+		if os.IsNotExist(err) {
+			createLeaderboardFileIfNotExists()
+			return []Leaderboard{}, nil
+		}
+		return nil, fmt.Errorf("error reading leaderboard file: %w", err)
 	}
 
-	byteToSave, err := json.Marshal(leaderboardTable)
-	if err != nil {
-		log.Fatal("unable to convert struct to byte")
+	// If file is empty, return empty slice
+	if len(fileByte) == 0 {
+		return []Leaderboard{}, nil
 	}
-	err = os.WriteFile(leaderboardFileName, byteToSave, 0644)
-	if err != nil {
-		log.Fatal("unable to save to leaderboard")
+
+	var entries []Leaderboard
+	if err := json.Unmarshal(fileByte, &entries); err != nil {
+		return nil, fmt.Errorf("error parsing leaderboard data: %w", err)
 	}
-	showLeaderBoard()
+
+	return entries, nil
+}
+
+func saveToLeaderboard(timesPlayed int, difficulty int) error {
+
+	difficultyStr, ok := mapDifficulties[difficulty]
+	if !ok {
+		return fmt.Errorf("invalid difficulty level: %d", difficulty)
+	}
+
+	// Create new entry
+	newEntry := Leaderboard{
+		TimesPlayed: timesPlayed,
+		Date:        time.Now(),
+		Difficulty:  difficultyStr,
+	}
+
+	// Read existing leaderboard
+	existingEntries, err := readLeaderboardFile()
+	if err != nil {
+		return fmt.Errorf("error reading leaderboard: %w", err)
+	}
+
+	// Append new entry
+	existingEntries = append(existingEntries, newEntry)
+
+	// Save updated leaderboard
+	if err := writeLeaderboardFile(existingEntries); err != nil {
+		return fmt.Errorf("error writing leaderboard: %w", err)
+	}
+
+	return nil
 }
 
 func showLeaderBoard() {
@@ -259,6 +297,14 @@ func showLeaderBoard() {
 
 	for key, value := range leaderboardTable {
 		fmt.Printf("%d: %v\n", key+1, value)
+	}
+	leaderboard, err := readLeaderboardFile()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("S/N", "Difficulty", "Times Played", "Date")
+	for key, value := range leaderboard {
+		fmt.Printf("%d %v %v %v\n", key+1, value.Difficulty, value.TimesPlayed, value.Date.Format("2006-01-02"))
 	}
 }
 
