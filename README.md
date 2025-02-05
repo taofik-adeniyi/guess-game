@@ -1,6 +1,6 @@
 # HELPFUL LINK
 
-[https://github.com/thewhitetulip/guess-the-number/blob/master/guess.go](https://github.com/thewhitetulip/guess-the-number/blob/master/guess.go)
+[https://roadmap.sh/projects/number-guessing-game](https://roadmap.sh/projects/number-guessing-game)
 
 # Guess the Number
 
